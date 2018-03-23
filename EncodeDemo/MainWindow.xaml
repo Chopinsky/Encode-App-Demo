@@ -5,8 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EncodeDemo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Encode Demo" Height="600" Width="800" ResizeMode="CanMinimize" Background="#FF0F0F0F">
+
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="45" />
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="45" />
+            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="45" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="60*"/>
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS" TextDecorations="{x:Null}">
+            Enter Input:
+        </TextBlock>
+        <TextBox x:Name="InputField" Grid.Column="1" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
+                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" TextChanged="InputField_TextChanged" 
+                 TextWrapping="Wrap" />
+
+        <TextBlock Grid.Column="3" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS">
+            Encoded Output:
+        </TextBlock>
+        <TextBox x:Name="OutputField" Grid.Column="3" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
+                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" IsReadOnly="True" TextWrapping="Wrap" />
+
     </Grid>
 </Window>
