@@ -1,4 +1,6 @@
-﻿namespace EncodeDemo
+﻿using System.Collections.Generic;
+
+namespace EncodeDemo
 {
     /// <summary>
     /// Interface to implement for encode providers
@@ -19,6 +21,12 @@
         ///   The limit of the characters that we can use synchronized mode to encode
         /// </returns>
         int GetSyncEncodeCharLimit();
+
+        /// <summary>
+        ///   Return the encode characters map from the provider
+        /// </summary>
+        /// <returns>The character -> character map used for the encoding</returns>
+        Dictionary<char, char> GetEncodeMap();
 
         /// <summary>
         ///   Reset and regenerate the encode table

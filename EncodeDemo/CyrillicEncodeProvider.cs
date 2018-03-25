@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace EncodeDemo
 {
+    /// <summary>
+    /// Encode provider to map English alphanumeric to random Cyrillic characters
+    /// </summary>
     public sealed class CyrillicEncodeProvider: IEncodeProvider
     {
         private const int SYNC_ENCODE_CHAR_LIMIT = 1;
@@ -17,6 +21,7 @@ namespace EncodeDemo
 
         private Dictionary<char, char> encodeTable = new Dictionary<char, char>();
         private Random random = new Random();
+        private RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
 
         #endregion
 
@@ -58,15 +63,21 @@ namespace EncodeDemo
         }
 
         /// <summary>
+        ///   Return the encode characters map from the provider
+        /// </summary>
+        /// <returns>The character -> character map used for the encoding</returns>
+        public Dictionary<char, char> GetEncodeMap()
+        {
+            return encodeTable;
+        }
+
+        /// <summary>
         ///   Reset and regenerate the encode table
         /// </summary>
-        public async void RegenerateEncodeTable()
+        public void RegenerateEncodeTable()
         {
-            await Task.Run(() =>
-            {
-                encodeTable.Clear();
-                generateEncodeTable();
-            });
+            encodeTable.Clear();
+            generateEncodeTable();         
         }
 
         private void generateEncodeTable()
@@ -78,7 +89,11 @@ namespace EncodeDemo
             {
                 do
                 {
+                    // if use psudom random
                     cyrillic = GetNextCyrillicChar();
+
+                    // if use safe random, more expansive
+                    //cyrillic = GetNextCyrillicCharSafe();
 
                 } while (uniqueSet.Contains(cyrillic));
                 
@@ -107,7 +122,17 @@ namespace EncodeDemo
 
         private char GetNextCyrillicChar()
         {
-            return Convert.ToChar('\u0400' + random.Next(0, 255));
+            // default to use standard Cyrillic character set
+            return Convert.ToChar(0x0400 + random.Next(0, 255));
+        }
+
+        private char GetNextCyrillicCharSafe()
+        {
+            var bytes = new byte[1];
+            provider.GetBytes(bytes);
+
+            // default to use standard Cyrillic character set
+            return Convert.ToChar(0x0400 + (bytes[0] & 0x00FF));
         }
     }
 }

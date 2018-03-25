@@ -47,11 +47,11 @@
             <ColumnDefinition Width="45" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="80*" />
             <RowDefinition Height="20*" />
             <RowDefinition Height="60*"/>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Column="1" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS" 
@@ -74,23 +74,32 @@
         </TextBlock>
 
         <Button x:Name="ShowButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
-                HorizontalAlignment="Left" Margin="0,15,0,0" Background="DimGray" Foreground="#FFF7F7F7" 
+                HorizontalAlignment="Left" Margin="0,0,0,5" Background="DimGray" Foreground="#FFF7F7F7" 
                 AutomationProperties.AcceleratorKey="S" AutomationProperties.AccessKey="S" ClickMode="Press"
-                Template="{DynamicResource ButtonTemplate}" Content="Hide Translation Table" Click="ShowButton_Click"/>
+                Template="{DynamicResource ButtonTemplate}" Click="ShowButton_Click">
+            Hide Table
+        </Button>
 
         <Button x:Name="RegenerateButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
-                HorizontalAlignment="Center" Margin="0,15,0,0" Background="DimGray" 
+                HorizontalAlignment="Center" Margin="0,0,0,5" Background="DimGray" 
                 AutomationProperties.AcceleratorKey="E" AutomationProperties.AccessKey="E" Foreground="#FFF7F7F7" 
                 Template="{DynamicResource ButtonTemplate}" Click="RegenerateButton_Click" ClickMode="Press">
             Regenerate Encode Output
         </Button>
 
         <Button x:Name="ResetButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
-                HorizontalAlignment="Right" Margin="0,15,0,0" Background="DimGray" 
+                HorizontalAlignment="Right" Margin="0,0,0,5" Background="DimGray" 
                 AutomationProperties.AcceleratorKey="R" AutomationProperties.AccessKey="R" Foreground="#FFF7F7F7"
                 Template="{DynamicResource ButtonTemplate}" Click="ResetButton_Click" ClickMode="Press">
             Reset
         </Button>
+
+        <TextBlock Grid.Column="1" Grid.Row="3" Margin="0,0,0,0" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS">
+            Characters Map Table:
+        </TextBlock>
+        <TextBox x:Name="MapTable" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" Margin="0,30,0,0" AcceptsReturn="True" 
+                 Background="Black" Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="30,5" 
+                 IsReadOnly="True" TextWrapping="Wrap" />
 
     </Grid>
 </Window>

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,16 +18,21 @@ namespace EncodeDemo
         {
             InitializeComponent();
             InitializeEncodeProvider();
-            LastInput = InputField.Text;  // if we decide to use default text, update last input now
+
+            LastInput = InputField.Text;   // if we have default text, update last input now
+            ShowMapTable = true;           // if to default to false, update here
+            
+            ShowHideMapTable();            // this needs to happen after setup the ShowMapTable property
         }
 
         #region Private members
 
-        private string LastInput = string.Empty;
-        private IEncodeProvider EncodeProvider = null;
+        private string LastInput;
+        private bool ShowMapTable;
 
-        private Task<string> EncodeTask = null;
-        private CancellationTokenSource TokenSource = null;
+        private IEncodeProvider EncodeProvider;
+        private Task<string> EncodeTask;
+        private CancellationTokenSource TokenSource;
 
         #endregion
 
@@ -92,6 +99,49 @@ namespace EncodeDemo
             }
         }
 
+        private string GenerateShowMapTable()
+        {
+            var tableContent = new StringBuilder();
+            var count = 0;
+            var encodeMap = EncodeProvider.GetEncodeMap();
+
+            foreach (KeyValuePair<char, char> pair in encodeMap)
+            {
+                if (tableContent.Length > 0)
+                {
+                    // if we have contents, append separators.
+                    if (count % 10 == 0)
+                    {
+                        tableContent.Append(",\r\n");
+                    }
+                    else
+                    {
+                        tableContent.Append(",\t");
+                    }
+                }
+
+                tableContent.AppendFormat("{0}={1}", pair.Key, pair.Value);
+                count++;
+            }
+
+            tableContent.Append('.');       // ending the table with dot
+            return tableContent.ToString();
+        }
+
+        private void ShowHideMapTable()
+        {
+            if (ShowMapTable)
+            {
+                ShowButton.Content = "Hide Table";
+                MapTable.Text = GenerateShowMapTable();
+            }
+            else
+            {
+                ShowButton.Content = "Show Table";
+                MapTable.Text = string.Empty;
+            }
+        }
+
         #endregion
 
         #region Event handlers
@@ -148,13 +198,27 @@ namespace EncodeDemo
 
         private void ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowButton.Content = "Show Translation Table";
+            ShowMapTable = !ShowMapTable;
+            ShowHideMapTable();
         }
 
-        private void RegenerateButton_Click(object sender, RoutedEventArgs e)
+        private async void RegenerateButton_Click(object sender, RoutedEventArgs e)
         {
-            EncodeProvider.RegenerateEncodeTable();
-            UpdateOutputAsync(InputField.Text, string.Empty);
+            await Task.Run(() =>
+            {
+                EncodeProvider.RegenerateEncodeTable();
+            });
+
+            ShowHideMapTable();
+
+            if (string.IsNullOrEmpty(InputField.Text))
+            {
+                OutputField.Text = string.Empty;
+            }
+            else
+            {
+                UpdateOutputAsync(InputField.Text, string.Empty);
+            }         
         }
 
         private void ResetButton_Click(object sender, RoutedEventArgs e)
