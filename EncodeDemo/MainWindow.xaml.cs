@@ -12,14 +12,6 @@ namespace EncodeDemo
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static string LastInput = string.Empty;
-        private static IEncodeProvider EncodeProvider = null;
-
-        private static Task<string> EncodeTask = null;
-        private static CancellationTokenSource TokenSource = null;
-
-        private const int SYNC_ENCODE_CHAR_LIMIT = 128;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -27,18 +19,44 @@ namespace EncodeDemo
             LastInput = InputField.Text;  // if we decide to use default text, update last input now
         }
 
+        #region Private members
+
+        private string LastInput = string.Empty;
+        private IEncodeProvider EncodeProvider = null;
+
+        private Task<string> EncodeTask = null;
+        private CancellationTokenSource TokenSource = null;
+
+        #endregion
+
+        #region Override
+
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
 
             TryCancelEncodeTask();
-            TokenSource.Dispose();
+
+            if (TokenSource != null)
+            {
+                TokenSource.Dispose();
+            }
         }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            InputField.Focus();
+        }
+
+        #endregion
+
+        #region Helper methods
 
         private void InitializeEncodeProvider()
         {
             EncodeProvider = new CyrillicEncodeProvider();
-            TokenSource = new CancellationTokenSource();
         }
 
         private void TryCancelEncodeTask()
@@ -49,8 +67,36 @@ namespace EncodeDemo
             }
         }
 
+        private async void UpdateOutputAsync(string current, string encoded)
+        {
+            RaiseShield();
+
+            if (TokenSource == null)
+            {
+                // Lazy initialization
+                TokenSource = new CancellationTokenSource();
+            }
+
+            // Cancel any currently run task and run the new task
+            TryCancelEncodeTask();
+            EncodeTask = Task.Run(() =>
+            {
+                return EncodeService.Encode(current, LastInput, encoded, EncodeProvider);
+            }, TokenSource.Token);
+
+            var text = await EncodeTask;
+            if (EncodeTask != null && EncodeTask.Status == TaskStatus.RanToCompletion)
+            {
+                OutputField.Text = text;
+                EncodeTask = null;
+            }
+        }
+
+        #endregion
+
         #region Event handlers
-        private async void InputField_TextChanged(object sender, TextChangedEventArgs e)
+
+        private void InputField_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (EncodeProvider == null)
             {
@@ -58,35 +104,20 @@ namespace EncodeDemo
                 InitializeEncodeProvider();
             }
             
-            string current = InputField.Text;
-            string encoded = OutputField.Text;
-
             // Update last
-            LastInput = current;
+            LastInput = InputField.Text;
 
-            if (InputField.Text.Length < SYNC_ENCODE_CHAR_LIMIT)
+            if (string.IsNullOrEmpty(InputField.Text))
             {
-                OutputField.Text = EncodeService.Encode(current, LastInput, encoded, EncodeProvider);
+                OutputField.Text = string.Empty;
+            }
+            else if (InputField.Text.Length < EncodeProvider.GetSyncEncodeCharLimit())
+            {
+                OutputField.Text = EncodeService.Encode(InputField.Text, LastInput, OutputField.Text, EncodeProvider);
             }
             else
             {
-                RaiseShield();
-                TryCancelEncodeTask();
-
-                EncodeTask = Task.Run(() =>
-                {
-                    string output = EncodeService.Encode(current, LastInput, encoded, EncodeProvider);
-                    return output;
-                }, TokenSource.Token);
-
-                var text = await EncodeTask;
-                if (EncodeTask != null && EncodeTask.Status == TaskStatus.RanToCompletion)
-                {
-                    OutputField.Text = text;
-                    EncodeTask = null;
-                }
-
-                LowerShield();
+                UpdateOutputAsync(InputField.Text, OutputField.Text);
             }
         }
 
@@ -103,6 +134,7 @@ namespace EncodeDemo
                 {
                     OutputField.Focus();
                     OutputField.ScrollToLine(line);
+
                     InputField.Focus();
                 }
                 catch (ArgumentOutOfRangeException err)
@@ -110,19 +142,47 @@ namespace EncodeDemo
                     throw err;
                 }
             }
+
+            LowerShield();
         }
+
+        private void ShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowButton.Content = "Show Translation Table";
+        }
+
+        private void RegenerateButton_Click(object sender, RoutedEventArgs e)
+        {
+            EncodeProvider.RegenerateEncodeTable();
+            UpdateOutputAsync(InputField.Text, string.Empty);
+        }
+
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Output field will be reset by the event
+            InputField.Clear();
+        }
+
         #endregion
 
         #region Shield Updates
+
         private void RaiseShield()
         {
-            Shield.Visibility = Visibility.Visible;
+            if (Shield.Visibility != Visibility.Visible)
+            {
+                Shield.Visibility = Visibility.Visible;
+            }
         }
 
         private void LowerShield()
         {
-            Shield.Visibility = Visibility.Hidden;
+            if (Shield.Visibility != Visibility.Hidden)
+            {
+                Shield.Visibility = Visibility.Hidden;
+            }
         }
+
         #endregion
     }
 }

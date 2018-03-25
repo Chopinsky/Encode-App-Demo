@@ -75,20 +75,20 @@
 
         <Button x:Name="ShowButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
                 HorizontalAlignment="Left" Margin="0,15,0,0" Background="DimGray" Foreground="#FFF7F7F7" 
-                AutomationProperties.AcceleratorKey="S" AutomationProperties.AccessKey="S"
-                Template="{DynamicResource ButtonTemplate}" Content="Hide Translation Table"/>
+                AutomationProperties.AcceleratorKey="S" AutomationProperties.AccessKey="S" ClickMode="Press"
+                Template="{DynamicResource ButtonTemplate}" Content="Hide Translation Table" Click="ShowButton_Click"/>
 
         <Button x:Name="RegenerateButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
                 HorizontalAlignment="Center" Margin="0,15,0,0" Background="DimGray" 
                 AutomationProperties.AcceleratorKey="E" AutomationProperties.AccessKey="E" Foreground="#FFF7F7F7" 
-                Template="{DynamicResource ButtonTemplate}">
+                Template="{DynamicResource ButtonTemplate}" Click="RegenerateButton_Click" ClickMode="Press">
             Regenerate Encode Output
         </Button>
 
         <Button x:Name="ResetButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
                 HorizontalAlignment="Right" Margin="0,15,0,0" Background="DimGray" 
                 AutomationProperties.AcceleratorKey="R" AutomationProperties.AccessKey="R" Foreground="#FFF7F7F7"
-                Template="{DynamicResource ButtonTemplate}">
+                Template="{DynamicResource ButtonTemplate}" Click="ResetButton_Click" ClickMode="Press">
             Reset
         </Button>
 
