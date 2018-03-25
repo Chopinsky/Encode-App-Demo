@@ -7,6 +7,37 @@
         mc:Ignorable="d"
         Title="Encode Demo" Height="600" Width="800" ResizeMode="CanMinimize" Background="#FF0F0F0F">
 
+    <Window.Resources>
+        <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
+            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsDefaulted" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" 
+                            Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FF0AAAFF"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF0AAAFF"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FF1996C8"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF1996C8"/>
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
+                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="#FF838383"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="45" />
@@ -18,22 +49,48 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="80*" />
+            <RowDefinition Height="20*" />
             <RowDefinition Height="60*"/>
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS" TextDecorations="{x:Null}">
+        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS" 
+                   TextDecorations="{x:Null}">
             Enter Input:
         </TextBlock>
         <TextBox x:Name="InputField" Grid.Column="1" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
-                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" TextChanged="InputField_TextChanged" 
-                 TextWrapping="Wrap" />
+                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" 
+                 TextChanged="InputField_TextChanged" TextWrapping="Wrap" />
 
         <TextBlock Grid.Column="3" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS">
             Encoded Output:
         </TextBlock>
         <TextBox x:Name="OutputField" Grid.Column="3" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
-                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" IsReadOnly="True" TextWrapping="Wrap" />
+                 Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" IsReadOnly="True"
+                 TextWrapping="Wrap" TextChanged="OutputField_TextChanged" />
+        <TextBlock x:Name="Shield" Grid.Column="3" Grid.Row="1" Margin="0,30,0,10" FontSize="16" Foreground="White" 
+                   FontFamily="Arial Unicode MS" Background="Black" Opacity="0.5" Padding="125,95,0,0" Visibility="Hidden">
+            Updateing...
+        </TextBlock>
+
+        <Button x:Name="ShowButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
+                HorizontalAlignment="Left" Margin="0,15,0,0" Background="DimGray" Foreground="#FFF7F7F7" 
+                AutomationProperties.AcceleratorKey="S" AutomationProperties.AccessKey="S"
+                Template="{DynamicResource ButtonTemplate}" Content="Hide Translation Table"/>
+
+        <Button x:Name="RegenerateButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
+                HorizontalAlignment="Center" Margin="0,15,0,0" Background="DimGray" 
+                AutomationProperties.AcceleratorKey="E" AutomationProperties.AccessKey="E" Foreground="#FFF7F7F7" 
+                Template="{DynamicResource ButtonTemplate}">
+            Regenerate Encode Output
+        </Button>
+
+        <Button x:Name="ResetButton" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Width="200" Height="45" FontSize="14"
+                HorizontalAlignment="Right" Margin="0,15,0,0" Background="DimGray" 
+                AutomationProperties.AcceleratorKey="R" AutomationProperties.AccessKey="R" Foreground="#FFF7F7F7"
+                Template="{DynamicResource ButtonTemplate}">
+            Reset
+        </Button>
 
     </Grid>
 </Window>
