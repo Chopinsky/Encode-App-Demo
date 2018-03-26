@@ -78,7 +78,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CyrillicEncodeProvider.cs" />
-    <Compile Include="Dictionary.cs" />
     <Compile Include="EncodeService.cs" />
     <Compile Include="IEncodeProvider.cs" />
     <Compile Include="MainWindow.xaml.cs">

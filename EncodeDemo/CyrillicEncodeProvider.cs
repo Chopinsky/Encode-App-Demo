@@ -10,7 +10,7 @@ namespace EncodeDemo
     /// </summary>
     public sealed class CyrillicEncodeProvider: IEncodeProvider
     {
-        private const int SYNC_ENCODE_CHAR_LIMIT = 1;
+        private const int SYNC_ENCODE_CHAR_LIMIT = 1024;
 
         public CyrillicEncodeProvider()
         {

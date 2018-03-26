@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -74,7 +73,7 @@ namespace EncodeDemo
             }
         }
 
-        private async void UpdateOutputAsync(string current, string encoded)
+        private async void UpdateOutputAsync(string current)
         {
             RaiseShield();
 
@@ -88,7 +87,7 @@ namespace EncodeDemo
             TryCancelEncodeTask();
             EncodeTask = Task.Run(() =>
             {
-                return EncodeService.Encode(current, LastInput, encoded, EncodeProvider);
+                return EncodeService.Encode(current, EncodeProvider);
             }, TokenSource.Token);
 
             var text = await EncodeTask;
@@ -99,41 +98,12 @@ namespace EncodeDemo
             }
         }
 
-        private string GenerateShowMapTable()
-        {
-            var tableContent = new StringBuilder();
-            var count = 0;
-            var encodeMap = EncodeProvider.GetEncodeMap();
-
-            foreach (KeyValuePair<char, char> pair in encodeMap)
-            {
-                if (tableContent.Length > 0)
-                {
-                    // if we have contents, append separators.
-                    if (count % 10 == 0)
-                    {
-                        tableContent.Append(",\r\n");
-                    }
-                    else
-                    {
-                        tableContent.Append(",\t");
-                    }
-                }
-
-                tableContent.AppendFormat("{0}={1}", pair.Key, pair.Value);
-                count++;
-            }
-
-            tableContent.Append('.');       // ending the table with dot
-            return tableContent.ToString();
-        }
-
         private void ShowHideMapTable()
         {
             if (ShowMapTable)
             {
                 ShowButton.Content = "Hide Table";
-                MapTable.Text = GenerateShowMapTable();
+                MapTable.Text = EncodeService.GenerateShowMapTable(EncodeProvider);
             }
             else
             {
@@ -153,27 +123,29 @@ namespace EncodeDemo
                 // This shouldn't happen, but just be cautious
                 InitializeEncodeProvider();
             }
-            
-            // Update last
-            LastInput = InputField.Text;
 
             if (string.IsNullOrEmpty(InputField.Text))
             {
                 OutputField.Text = string.Empty;
+                return;
             }
-            else if (InputField.Text.Length < EncodeProvider.GetSyncEncodeCharLimit())
-            {
-                OutputField.Text = EncodeService.Encode(InputField.Text, LastInput, OutputField.Text, EncodeProvider);
-            }
-            else
-            {
-                UpdateOutputAsync(InputField.Text, OutputField.Text);
-            }
+
+            UpdateOutputAsync(InputField.Text);            
         }
 
         private void OutputField_TextChanged(object sender, TextChangedEventArgs e)
         {
-            int line = InputField.GetLineIndexFromCharacterIndex(InputField.CaretIndex);
+            var caretIndex = InputField.CaretIndex;
+            if (caretIndex > OutputField.Text.Length)
+            {
+                // we're not in-synch with the input field yet, wait for the next mapping task to finish
+                // and then update the scroll bar position.
+                return;
+            }
+
+            // After the last update, the caret index shall point to the same position as we do 1-to-1 character
+            // mapping here.
+            int line = OutputField.GetLineIndexFromCharacterIndex(caretIndex);
 
             // As OutputField can be updated in async, InputField's line count could be larger than the
             // OutputField line count, and since the update can be behind, we only update the scroll position
@@ -217,7 +189,7 @@ namespace EncodeDemo
             }
             else
             {
-                UpdateOutputAsync(InputField.Text, string.Empty);
+                UpdateOutputAsync(InputField.Text);
             }         
         }
 

@@ -60,14 +60,14 @@
         </TextBlock>
         <TextBox x:Name="InputField" Grid.Column="1" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
                  Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" 
-                 TextChanged="InputField_TextChanged" TextWrapping="Wrap" />
+                 TextChanged="InputField_TextChanged" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
 
         <TextBlock Grid.Column="3" Grid.Row="1" FontSize="16" Foreground="White" FontFamily="Arial Unicode MS">
             Encoded Output:
         </TextBlock>
         <TextBox x:Name="OutputField" Grid.Column="3" Grid.Row="1" Margin="0,30,0,10" AcceptsReturn="True" Background="Black" 
                  Foreground="#FF14FF00" FontSize="16" FontFamily="Arial Unicode MS" Padding="5" IsReadOnly="True"
-                 TextWrapping="Wrap" TextChanged="OutputField_TextChanged" />
+                 TextWrapping="Wrap" TextChanged="OutputField_TextChanged" VerticalScrollBarVisibility="Auto" />
         <TextBlock x:Name="Shield" Grid.Column="3" Grid.Row="1" Margin="0,30,0,10" FontSize="16" Foreground="White" 
                    FontFamily="Arial Unicode MS" Background="Black" Opacity="0.5" Padding="125,95,0,0" Visibility="Hidden">
             Updateing...

@@ -1,10 +1,19 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace EncodeDemo
 {
     public class EncodeService
     {
+        /// <summary>
+        /// Check if a character is an English alphanumeric
+        /// </summary>
+        /// <param name="ch">Input character to check with</param>
+        /// <returns>True if the input is an alphanumeric</returns>
         public static bool IsAlphanumeric(char ch)
         {
             if ((ch >= 'A' && ch <= 'Z') ||
@@ -16,8 +25,49 @@ namespace EncodeDemo
 
             return false;
         }
+        
+        /// <summary>
+        /// Generate the encode map table with formats
+        /// </summary>
+        /// <param name="provider">Encode provider that implements the IEncodeProvider</param>
+        /// <returns>The string content of the encode map table</returns>
+        public static string GenerateShowMapTable(IEncodeProvider provider)
+        {
+            var tableContent = new StringBuilder();
+            var count = 0;
+            var encodeMap = provider.GetEncodeMap();
 
-        public static string Encode(string current, string last, string lastEncodedValue, IEncodeProvider provider)
+            foreach (KeyValuePair<char, char> pair in encodeMap)
+            {
+                if (tableContent.Length > 0)
+                {
+                    // if we already have contents, append separators.
+                    if (count % 10 == 0)
+                    {
+                        tableContent.Append(",\r\n");
+                    }
+                    else
+                    {
+                        tableContent.Append(",\t");
+                    }
+                }
+
+                tableContent.AppendFormat("{0}={1}", pair.Key, pair.Value);
+                count++;
+            }
+
+            tableContent.Append('.');       // ending the table with dot
+            return tableContent.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="current"></param>
+        /// <param name="changes"></param>
+        /// <param name="provider"></param>
+        /// <returns></returns>
+        public static string Encode(string current, IEncodeProvider provider)
         {
             SimulateSlowEncode();
 
@@ -26,8 +76,6 @@ namespace EncodeDemo
             {
                 return current;
             }
-
-            // todo: find changed substring and only update those
 
             return provider.Encode(current);
         }
