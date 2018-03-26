@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace EncodeDemo
 {
@@ -10,8 +9,6 @@ namespace EncodeDemo
     /// </summary>
     public sealed class CyrillicEncodeProvider: IEncodeProvider
     {
-        private const int SYNC_ENCODE_CHAR_LIMIT = 1024;
-
         public CyrillicEncodeProvider()
         {
             generateEncodeTable();
@@ -49,17 +46,6 @@ namespace EncodeDemo
             }
 
             return new string(encodeArr);
-        }
-
-        /// <summary>
-        ///   Get the character count limit where we can accept the synch-encode mode.
-        /// </summary>
-        /// <returns>
-        ///   The limit of the characters that we can use synchronized mode to encode
-        /// </returns>
-        public int GetSyncEncodeCharLimit()
-        {
-            return SYNC_ENCODE_CHAR_LIMIT;
         }
 
         /// <summary>

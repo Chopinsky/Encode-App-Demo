@@ -15,14 +15,6 @@ namespace EncodeDemo
         string Encode(string str);
 
         /// <summary>
-        ///   Get the character count limit where we can accept the synch-encode mode.
-        /// </summary>
-        /// <returns>
-        ///   The limit of the characters that we can use synchronized mode to encode
-        /// </returns>
-        int GetSyncEncodeCharLimit();
-
-        /// <summary>
         ///   Return the encode characters map from the provider
         /// </summary>
         /// <returns>The character -> character map used for the encoding</returns>

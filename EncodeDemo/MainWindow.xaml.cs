@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,23 +30,10 @@ namespace EncodeDemo
 
         private IEncodeProvider EncodeProvider;
         private Task<string> EncodeTask;
-        private CancellationTokenSource TokenSource;
 
         #endregion
 
         #region Override
-
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-
-            TryCancelEncodeTask();
-
-            if (TokenSource != null)
-            {
-                TokenSource.Dispose();
-            }
-        }
 
         protected override void OnActivated(EventArgs e)
         {
@@ -65,33 +51,17 @@ namespace EncodeDemo
             EncodeProvider = new CyrillicEncodeProvider();
         }
 
-        private void TryCancelEncodeTask()
-        {
-            if (EncodeTask != null && EncodeTask.Status == TaskStatus.RanToCompletion)
-            {
-                TokenSource.Cancel();
-            }
-        }
-
         private async void UpdateOutputAsync(string current)
         {
             RaiseShield();
 
-            if (TokenSource == null)
-            {
-                // Lazy initialization
-                TokenSource = new CancellationTokenSource();
-            }
-
-            // Cancel any currently run task and run the new task
-            TryCancelEncodeTask();
             EncodeTask = Task.Run(() =>
             {
                 return EncodeService.Encode(current, EncodeProvider);
-            }, TokenSource.Token);
+            });
 
             var text = await EncodeTask;
-            if (EncodeTask != null && EncodeTask.Status == TaskStatus.RanToCompletion)
+            if (EncodeTask != null && EncodeTask.IsCompleted)
             {
                 OutputField.Text = text;
                 EncodeTask = null;

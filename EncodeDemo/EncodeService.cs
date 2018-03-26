@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using System.Windows.Controls;
 
 namespace EncodeDemo
 {
@@ -83,7 +81,10 @@ namespace EncodeDemo
         [Conditional("DEBUG")]
         private static void SimulateSlowEncode()
         {
-            Thread.Sleep(200);
+            if (Properties.Settings.Default.ApplyAsyncDelay)
+            {
+                Thread.Sleep(200);
+            }
         }
     }
 }
