@@ -68,7 +68,6 @@ namespace EncodeDemo
 
         private void generateEncodeTable()
         {
-            var uniqueSet = new HashSet<char>();
             char cyrillic;
 
             foreach (char ch in GetNextAlphanumeric())
@@ -81,10 +80,9 @@ namespace EncodeDemo
                     // if use safe random, more expansive
                     //cyrillic = GetNextCyrillicCharSafe();
 
-                } while (uniqueSet.Contains(cyrillic));
+                } while (encodeTable.ContainsValue(cyrillic));
                 
                 encodeTable.Add(ch, cyrillic);
-                uniqueSet.Add(ch);
             }
         }
 

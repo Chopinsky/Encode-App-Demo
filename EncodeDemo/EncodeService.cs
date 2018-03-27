@@ -31,9 +31,19 @@ namespace EncodeDemo
         /// <returns>The string content of the encode map table</returns>
         public static string GenerateShowMapTable(IEncodeProvider provider)
         {
+            if (provider == null)
+            {
+                return ">> No encoding provider is set <<";
+            }
+
+            var encodeMap = provider.GetEncodeMap();
+            if (encodeMap == null || encodeMap.Count == 0)
+            {
+                return ">> No encoding map is provided <<";
+            }
+
             var tableContent = new StringBuilder();
             var count = 0;
-            var encodeMap = provider.GetEncodeMap();
 
             foreach (KeyValuePair<char, char> pair in encodeMap)
             {
@@ -62,7 +72,6 @@ namespace EncodeDemo
         /// 
         /// </summary>
         /// <param name="current"></param>
-        /// <param name="changes"></param>
         /// <param name="provider"></param>
         /// <returns></returns>
         public static string Encode(string current, IEncodeProvider provider)
