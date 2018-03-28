@@ -11,7 +11,7 @@ namespace EncodeDemo
     {
         public CyrillicEncodeProvider()
         {
-            generateEncodeTable();
+            GenerateEncodeTable();
         }
         
         #region Private members
@@ -63,10 +63,10 @@ namespace EncodeDemo
         public void RegenerateEncodeTable()
         {
             encodeTable.Clear();
-            generateEncodeTable();         
+            GenerateEncodeTable();         
         }
 
-        private void generateEncodeTable()
+        private void GenerateEncodeTable()
         {
             char cyrillic;
 
@@ -74,11 +74,16 @@ namespace EncodeDemo
             {
                 do
                 {
-                    // if use psudom random
-                    cyrillic = GetNextCyrillicChar();
-
-                    // if use safe random, more expansive
-                    //cyrillic = GetNextCyrillicCharSafe();
+                    if (Properties.Settings.Default.UseSafeRandom)
+                    {
+                        // if use safe random, more expansive
+                        cyrillic = GetNextCyrillicCharSafe();
+                    }
+                    else
+                    {
+                        // if use psudom random
+                        cyrillic = GetNextCyrillicChar();
+                    }
 
                 } while (encodeTable.ContainsValue(cyrillic));
                 

@@ -31,5 +31,14 @@ namespace EncodeDemo.Properties {
                 return ((bool)(this["ApplyAsyncDelay"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UseSafeRandom {
+            get {
+                return ((bool)(this["UseSafeRandom"]));
+            }
+        }
     }
 }
