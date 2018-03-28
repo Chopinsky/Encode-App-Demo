@@ -25,7 +25,7 @@ namespace EncodeDemo.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ApplyAsyncDelay {
             get {
                 return ((bool)(this["ApplyAsyncDelay"]));
@@ -34,7 +34,7 @@ namespace EncodeDemo.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool UseSafeRandom {
             get {
                 return ((bool)(this["UseSafeRandom"]));
