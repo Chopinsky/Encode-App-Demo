@@ -14,7 +14,7 @@ namespace EncodeTestSupport
         {
             if (generateTableNow)
             {
-                generateEncodeTable();
+                GenerateEncodeTable();
             }            
         }
 
@@ -28,7 +28,7 @@ namespace EncodeTestSupport
         public void RegenerateEncodeTable()
         {
             encodeTable.Clear();
-            generateEncodeTable();
+            GenerateEncodeTable();
         }
 
         public string Encode(string str)
@@ -50,7 +50,7 @@ namespace EncodeTestSupport
             return builder.ToString();
         }
 
-        private void generateEncodeTable()
+        private void GenerateEncodeTable()
         {
             int diff = 'a' - 'A';
             char mapped;

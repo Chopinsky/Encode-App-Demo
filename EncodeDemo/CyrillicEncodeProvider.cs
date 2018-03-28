@@ -16,9 +16,9 @@ namespace EncodeDemo
         
         #region Private members
 
-        private Dictionary<char, char> encodeTable = new Dictionary<char, char>();
-        private Random random = new Random();
-        private RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
+        private readonly Dictionary<char, char> encodeTable = new Dictionary<char, char>();
+        private readonly Random random = new Random();
+        private readonly RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
 
         #endregion
 

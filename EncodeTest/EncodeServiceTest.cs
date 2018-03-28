@@ -1,6 +1,7 @@
 ﻿using EncodeDemo;
 using EncodeTestSupport;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace EncodeServiceTest
 {
@@ -106,58 +107,132 @@ namespace EncodeServiceTest
     [TestClass()]
     public class EncodTest
     {
+        private IEncodeProvider provider = new MockEncodeProvider();
+
         [TestMethod()]
         public void NullProviderEncodeTest()
         {
-            string encoded = EncodeService.Encode(null, null);
-            Assert.IsNull(encoded);
+            string encoded = EncodeService.Encode(null, "new", "old");
+            Assert.AreEqual("new", encoded);
 
-            encoded = EncodeService.Encode("content", null);
-            Assert.AreEqual("content", encoded);
-
-            encoded = EncodeService.Encode("   ", null);
-            Assert.AreEqual("   ", encoded);
-        }
-
-        [TestMethod()]
-        public void ProviderNullOrEmptyInputEncodeTest()
-        {
-            IEncodeProvider provider = new MockEncodeProvider();
-            string encoded = EncodeService.Encode(null, provider);
-            Assert.IsNull(encoded);
-
-            encoded = EncodeService.Encode("", provider);
+            encoded = EncodeService.Encode(null, "", "old");
             Assert.AreEqual("", encoded);
 
-            encoded = EncodeService.Encode("   ", provider);
+            encoded = EncodeService.Encode(null, "   ", "old");
             Assert.AreEqual("   ", encoded);
-
-            encoded = EncodeService.Encode("\t  \r\n   ", provider);
-            Assert.AreEqual("\t  \r\n   ", encoded);
         }
 
         [TestMethod()]
-        public void ProviderNonNullInputEncodeTest()
+        public void OutOfRangeEncodeTest()
         {
-            IEncodeProvider provider = new MockEncodeProvider();
-            string encoded = EncodeService.Encode("abc", provider);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            {
+                // add OOR
+                string encoded = EncodeService.Encode(provider, "oldish", "old", 4, 3, 0);
+            });
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            {
+                // remove OOR
+                string encoded = EncodeService.Encode(provider, "ol", "old", 4, 2, 3);
+            });
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            {
+                // remove OOR
+                string encoded = EncodeService.Encode(provider, "old", "old", 3, 0, 4);
+            });
+        }
+
+        [TestMethod()]
+        public void NullOrEmptyInputEncodeTest()
+        {
+            string encoded = EncodeService.Encode(provider, null, "old");
+            Assert.IsNull(encoded);
+
+            encoded = EncodeService.Encode(provider, "", "old");
+            Assert.AreEqual("", encoded);
+
+            encoded = EncodeService.Encode(provider, "  \t \r\n   ", "old");
+            Assert.AreEqual("  \t \r\n   ", encoded);
+        }
+
+        [TestMethod()]
+        public void BlankLastEncodeTest()
+        {
+            string encoded = EncodeService.Encode(provider, "n", "", 0, 1, 0);
+            Assert.AreEqual("N", encoded);
+
+            encoded = EncodeService.Encode(provider, "new", "");
+            Assert.AreEqual("NEW", encoded);
+
+            encoded = EncodeService.Encode(provider, "new", "", 4, 0, 2);  // out of range, but okay since we run full update
+            Assert.AreEqual("NEW", encoded);
+        }
+
+        [TestMethod()]
+        public void EncodeWholeInputTest()
+        {
+            string encoded = EncodeService.Encode(provider, "abc,123,XYZ");  // full update
+            Assert.AreEqual("ABC,123,xyz", encoded);
+        }
+
+        [TestMethod()]
+        public void OnlyAddEncodeTest()
+        {
+            string encoded = EncodeService.Encode(provider, "abc", "AB", 2, 1);
             Assert.AreEqual("ABC", encoded);
 
-            encoded = EncodeService.Encode("a123bc", provider);
-            Assert.AreEqual("A123BC", encoded);
+            encoded = EncodeService.Encode(provider, "abc", "AC", 1, 1);
+            Assert.AreEqual("ABC", encoded);
+
+            encoded = EncodeService.Encode(provider, "abc", "C", 0, 2);
+            Assert.AreEqual("ABC", encoded);
+            
+            encoded = EncodeService.Encode(provider, "abc", "", 0, 3);
+            Assert.AreEqual("ABC", encoded);
         }
 
         [TestMethod()]
-        public void ProviderMixedInputEncodeTest()
+        public void OnlyRemoveEncodeTest()
+        {
+            string encoded = EncodeService.Encode(provider, "abc", "ABCD", 3, 0, 1);
+            Assert.AreEqual("ABC", encoded);
+
+            encoded = EncodeService.Encode(provider, "ac", "ABC", 1, 0, 1);
+            Assert.AreEqual("AC", encoded);
+
+            encoded = EncodeService.Encode(provider, "c", "ABC", 0, 0, 2);
+            Assert.AreEqual("C", encoded);
+
+            encoded = EncodeService.Encode(provider, "", "ABC", 0, 0, 3);
+            Assert.AreEqual("", encoded);
+        }
+
+        [TestMethod()]
+        public void InPlaceUpdateEncodeTest()
+        {
+            string encoded = EncodeService.Encode(provider, "abc,123", "Whatever this was");  // full update if not giving specific positions to update
+            Assert.AreEqual("ABC,123", encoded);
+
+            encoded = EncodeService.Encode(provider, "a123bc", "Z123bc", 0, 1, 1);
+            Assert.AreEqual("A123bc", encoded);
+
+            encoded = EncodeService.Encode(provider, "abc123XYZ", "XYZ123bc", 0, 2, 1);
+            Assert.AreEqual("ABYZ123bc", encoded);
+        }
+
+        [TestMethod()]
+        public void MixedCharInputEncodeTest()
         {
             IEncodeProvider provider = new MockEncodeProvider();
-            string encoded = EncodeService.Encode("a測試bc", provider);
+            string encoded = EncodeService.Encode(provider, "a測試bc");
             Assert.AreEqual("A測試BC", encoded);
 
-            encoded = EncodeService.Encode("a,b\r\n   c", provider);
+            encoded = EncodeService.Encode(provider, "a,b\r\n   c");
             Assert.AreEqual("A,B\r\n   C", encoded);
 
-            encoded = EncodeService.Encode("abcXYZ", provider);
+            encoded = EncodeService.Encode(provider, "abcXYZ");
             Assert.AreEqual("ABCxyz", encoded);
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Threading;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,20 +16,17 @@ namespace EncodeDemo
         {
             InitializeComponent();
             InitializeEncodeProvider();
-
-            LastInput = InputField.Text;   // if we have default text, update last input now
-            ShowMapTable = true;           // if to default to false, update here
-            
+			
+            ShowMapTable = true;           // if to default to false, update here            
             ShowHideMapTable();            // this needs to happen after setup the ShowMapTable property
         }
 
         #region Private members
 
-        private string LastInput;
         private bool ShowMapTable;
-
         private IEncodeProvider EncodeProvider;
-        private Task<string> EncodeTask;
+		private Task<string> EncodeTask;
+		private ConcurrentQueue<Tuple<string, TextChange>> TaskQueue;
 
         #endregion
 
@@ -39,7 +36,7 @@ namespace EncodeDemo
         {
             base.OnActivated(e);
 
-            InputField.Focus();
+            InputField.Focus();            
         }
 
         #endregion
@@ -48,27 +45,77 @@ namespace EncodeDemo
 
         private void InitializeEncodeProvider()
         {
-            EncodeProvider = new CyrillicEncodeProvider();
+            EncodeProvider = ProviderFactory.CreateProvider(ProviderType.CyrillicEncoder);
         }
 
-        private async void UpdateOutputAsync(string current)
-        {
-            RaiseShield();
+		private async void UpdateOutputAsync(string current, TextChange change)
+		{
+			RaiseShield();
 
-            EncodeTask = Task.Run(() =>
-            {
-                return EncodeService.Encode(current, EncodeProvider);
-            });
+			if (TaskQueue == null)
+			{
+				TaskQueue = new ConcurrentQueue<Tuple<string, TextChange>>();
+			}
 
-            var text = await EncodeTask;
-            if (EncodeTask != null && EncodeTask.IsCompleted)
+			TaskQueue.Enqueue(new Tuple<string, TextChange>(current, change));
+            var output = OutputField.Text; // output field's text can't be moved, must copy it now
+            
+            if (EncodeTask != null && !EncodeTask.IsCompleted)
             {
-                OutputField.Text = text;
-                EncodeTask = null;
+                // if the task is running, let the queue finish and don't start a new
+                // concurrent queue, that could blow up many things.
+                return;
             }
-        }
 
-        private void ShowHideMapTable()
+            // No running updates, then start a new one
+			EncodeTask = Task.Run(() =>
+			{
+				Tuple<string, TextChange> source;
+                int offset = 0, added = 0, removed = 0;
+
+                while (!TaskQueue.IsEmpty)
+				{
+					source = null;
+					if (TaskQueue.TryDequeue(out source))
+					{
+						if (source == null)
+                        {
+                            // this shouldn't happen, but if it does, continue with the next update
+                            continue;
+                        }
+                        else if (source.Item2 == null)
+                        {
+                            // if change object is blank, means a head-to-tail update
+                            offset = 0;
+                            added = current.Length;
+                            removed = output.Length;
+                        }
+                        else
+                        {
+                            // has the TextChange object, then use it
+                            offset = source.Item2.Offset;
+                            added = source.Item2.AddedLength;
+                            removed = source.Item2.RemovedLength;
+                        }
+
+                        output = EncodeService.Encode(EncodeProvider, source.Item1, output, offset, added, removed);
+					}
+				}
+
+				return output;
+			});
+
+			var text = await EncodeTask;
+			if (OutputField.Text == text)
+			{
+				LowerShield();
+				return;
+			}
+
+			OutputField.Text = text;
+		}
+
+		private void ShowHideMapTable()
         {
             if (ShowMapTable)
             {
@@ -100,7 +147,8 @@ namespace EncodeDemo
                 return;
             }
 
-            UpdateOutputAsync(InputField.Text);            
+			TextChange change = e.Changes.FirstOrDefault();
+			UpdateOutputAsync(InputField.Text, change);
         }
 
         private void OutputField_TextChanged(object sender, TextChangedEventArgs e)
@@ -159,7 +207,7 @@ namespace EncodeDemo
             }
             else
             {
-                UpdateOutputAsync(InputField.Text);
+                UpdateOutputAsync(InputField.Text, null);
             }         
         }
 
