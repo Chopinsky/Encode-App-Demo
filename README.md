@@ -1,7 +1,10 @@
 # Encode Demo
 
-This project creates a small Windows application, that will take user input of a string, then convert and map all English Alphanumeric to 
-random Cyrillic characters. 
+This project creates a small Windows application, that will take user input of a string, then convert and map all English Alphanumeric to random Cyrillic characters. 
+
+## How To Use
+
+Launch the solution and run. 
 
 ## Specifications
 
@@ -11,3 +14,11 @@ random Cyrillic characters.
 - The mapping table is by default displayed, but can be turned on/off with the button.
 - Regenerate the encode table will create a new random mapping, and regenerate the output box.
 - Reset will clear the input (as well as the output) box.
+
+## License
+
+This application is licensed under MIT license.
+
+## Author
+
+Jacob Zuo, all rights reserved.

@@ -51,15 +51,12 @@ namespace EncodeDemo
 
 		private async void UpdateOutputAsync(string current, TextChange change)
 		{
-			RaiseShield();
-
 			if (TaskQueue == null)
 			{
 				TaskQueue = new ConcurrentQueue<Tuple<string, TextChange>>();
 			}
 
 			TaskQueue.Enqueue(new Tuple<string, TextChange>(current, change));
-            var output = OutputField.Text; // output field's text can't be moved, must copy it now
             
             if (EncodeTask != null && !EncodeTask.IsCompleted)
             {
@@ -68,8 +65,11 @@ namespace EncodeDemo
                 return;
             }
 
+            RaiseShield();
+            var output = OutputField.Text; // output field's text can't be moved, must copy it now
+
             // No running updates, then start a new one
-			EncodeTask = Task.Run(() =>
+            EncodeTask = Task.Run(() =>
 			{
 				Tuple<string, TextChange> source;
                 int offset = 0, added = 0, removed = 0;
@@ -106,16 +106,9 @@ namespace EncodeDemo
 				return output;
 			});
 
-			var text = await EncodeTask;
+            OutputField.Text = await EncodeTask;
             EncodeTask = null;
-
-			if (OutputField.Text == text)
-			{
-				LowerShield();
-				return;
-			}
-
-			OutputField.Text = text;
+            LowerShield();
 		}
 
 		private void ShowHideMapTable()
@@ -185,8 +178,6 @@ namespace EncodeDemo
                     throw err;
                 }
             }
-
-            LowerShield();
         }
 
         private void ShowButton_Click(object sender, RoutedEventArgs e)
